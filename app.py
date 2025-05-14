@@ -1,8 +1,7 @@
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
 import seaborn as sns
-
+import plotly.express as px 
 
 df=pd.read_csv("preprocessed_dataset.csv")
 
@@ -99,55 +98,35 @@ if indicator_df.empty:
     st.warning("No data for the selected indicator.")
 else:
     if analysis_choice == "Line Chart":
-        fig, ax = plt.subplots(figsize=(10, 4))
-        sns.lineplot(data=indicator_df, x='Year', y='Value', marker='o', ax=ax)
-        ax.set_title("Trend Over Time")
-        ax.set_xlabel("Year")
-        ax.set_ylabel("Value")
-        st.pyplot(fig)
+        fig = px.line(indicator_df, x='Year', y='Value', title='Trend Over Time',
+                      markers=True, labels={'Value': 'Value', 'Year': 'Year'})
+        st.plotly_chart(fig, use_container_width=True)
 
     elif analysis_choice == "Bar Chart":
-        fig, ax = plt.subplots(figsize=(10, 4))
-        indicator_df['Year_str'] = indicator_df['Year'].astype(int).astype(str)
-        sns.barplot(data=indicator_df, x='Year_str', y='Value', ax=ax, color='skyblue')
-        ax.set_title("Value Each Year")
-        ax.set_xlabel("Year")
-        ax.set_ylabel("Value")
-        plt.xticks(rotation=45, ha='right')
-        st.pyplot(fig)
+        fig = px.bar(indicator_df, x='Year', y='Value', title='Value Each Year',
+                     labels={'Value': 'Value', 'Year': 'Year'}, color_discrete_sequence=['skyblue'])
+        st.plotly_chart(fig, use_container_width=True)
+
 
     elif analysis_choice == "Scatter Plot":
-        fig, ax = plt.subplots(figsize=(10, 4))
-        sns.scatterplot(data=indicator_df, x='Year', y='Value', ax=ax)
-        ax.set_title("Scatter Plot")
-        ax.set_xlabel("Year")
-        ax.set_ylabel("Value")
-        st.pyplot(fig)
+        fig = px.scatter(indicator_df, x='Year', y='Value', title='Scatter Plot',
+                         labels={'Value': 'Value', 'Year': 'Year'})
+        st.plotly_chart(fig, use_container_width=True)
 
     elif analysis_choice == "Box Plot":
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.boxplot(data=indicator_df, y='Value', ax=ax, color='lightgreen')
-        ax.set_title("Value Distribution")
-        ax.set_ylabel("Value")
-        ax.set_xticklabels([])
-        st.pyplot(fig)
+        fig = px.box(indicator_df, y='Value', title='Value Distribution',
+                     labels={'Value': 'Value'})
+        st.plotly_chart(fig, use_container_width=True)
 
     elif analysis_choice == "Histogram":
-        fig, ax = plt.subplots(figsize=(10, 4))
-        sns.histplot(data=indicator_df, x='Value', kde=True, ax=ax, bins=10)
-        ax.set_title("Value Frequency Distribution")
-        ax.set_xlabel("Value")
-        ax.set_ylabel("Frequency")
-        st.pyplot(fig)
+        fig = px.histogram(indicator_df, x='Value', nbins=10, title='Value Frequency Distribution',
+                           labels={'Value': 'Value'})
+        st.plotly_chart(fig, use_container_width=True)
 
     elif analysis_choice == "Area Chart":
-        fig, ax = plt.subplots(figsize=(10, 4))
-        ax.fill_between(indicator_df['Year'], indicator_df['Value'], alpha=0.4, color='tomato')
-        sns.lineplot(data=indicator_df, x='Year', y='Value', marker='.', ax=ax, color='darkred', linewidth=0.8)
-        ax.set_title("Trend Over Time (Area)")
-        ax.set_xlabel("Year")
-        ax.set_ylabel("Value")
-        st.pyplot(fig)
+        fig = px.area(indicator_df, x='Year', y='Value', title='Trend Over Time (Area)',
+                      labels={'Value': 'Value', 'Year': 'Year'})
+        st.plotly_chart(fig, use_container_width=True)
 
     elif analysis_choice == "Statistics":
         st.write("Basic Statistics:")
