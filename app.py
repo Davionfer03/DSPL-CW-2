@@ -4,15 +4,52 @@ import seaborn as sns
 import plotly.express as px 
 from sklearn.linear_model import LinearRegression
 import numpy as np
+import base64
 
 df=pd.read_csv("preprocessed_dataset.csv")
 
 #set style
 sns.set(style="whitegrid")
 
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
 # configure streamlit page
 st.set_page_config(page_title="Srilanka External Debt Dashboard", layout="wide")
 st.title("Sri Lanka External Debt Analysis Dashboard")
+
+# Set background image using CSS
+page_bg_img = '''
+<style>
+.stApp {
+    background-image: url("https://www.google.com/search?q=analysis+dashboard+background+image&sca_esv=6f06d4db603ecb2b&rlz=1C1ONGR_enLK1144LK1147&udm=2&biw=767&bih=730&ei=w14kaJHjHbPE4-EPjvCL6Ac&ved=0ahUKEwjR0Om3z6KNAxUz4jgGHQ74An0Q4dUDCBE&uact=5&oq=analysis+dashboard+background+image&gs_lp=EgNpbWciI2FuYWx5c2lzIGRhc2hib2FyZCBiYWNrZ3JvdW5kIGltYWdlSMIbUNUCWJwZcAF4AJABAJgBwwKgAdAeqgEIMC40LjEyLjG4AQPIAQD4AQGYAgSgAscFwgIGEAAYBxgewgIFEAAYgATCAgQQABgewgIGEAAYBRgewgIGEAAYCBgemAMAiAYBkgcFMS4xLjKgB7UYsgcFMC4xLjK4B8EF&sclient=img#vhid=qTvuJybnelUarM&vssid=mosaic"); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+</style>
+'''
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
+
+img_base64 = get_base64_of_bin_file('Image CW.webp')
+page_bg_img = f'''
+<style>
+.stApp {{
+    background-image: url("data:image/jpg;base64,{img_base64}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}}
+</style>
+'''
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
+
 
 # About section
 with st.sidebar.markdown("ℹ About this Dashboard"):
