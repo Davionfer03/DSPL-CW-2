@@ -2,6 +2,8 @@ import pandas as pd
 import streamlit as st
 import seaborn as sns
 import plotly.express as px 
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 df=pd.read_csv("preprocessed_dataset.csv")
 
@@ -134,12 +136,76 @@ else:
         st.write("All Data Points:")
         st.dataframe(indicator_df[['Year', 'Value', 'Indicator Code']].reset_index(drop=True).style.format({'Value': '{:,.2f}'}))
 
- # CSV Download
-    st.markdown("---")
-    csv_data = convert_df_to_csv(indicator_df[['Year', 'Indicator Name', 'Indicator Code', 'Value']])
-    safe_name = "".join([c if c.isalnum() else "_" for c in selected_indicator])[:50]
-    file_name = f"{safe_name}_data.csv"
-    st.download_button("📥 Download Data as CSV", data=csv_data, file_name=file_name, mime='text/csv')
+# Forecast next year's value with multiple chart types
+if 'predict_clicked' not in st.session_state:
+    st.session_state.predict_clicked = False
+
+if not indicator_df.empty and indicator_df['Year'].nunique() > 1:
+    if st.button("📈 Prediction for the year 2024"):
+        st.session_state.predict_clicked = True
+
+if st.session_state.predict_clicked and not indicator_df.empty and indicator_df['Year'].nunique() > 1:
+    try:
+        # Prepare data
+        X = indicator_df[['Year']]
+        y = indicator_df['Value']
+
+        # Train model
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # Predict
+        next_year = indicator_df['Year'].max() + 1
+        prediction = model.predict(np.array([[next_year]]))[0]
+
+        st.success(f"📅 Predicted value for {next_year} is: **{prediction:,.2f}**")
+
+        # Extended DataFrame with prediction
+        extended_df = indicator_df.copy()
+        new_row = pd.DataFrame({
+            'Year': [next_year],
+            'Value': [prediction],
+            'Indicator Name': [selected_indicator]
+        })
+        extended_df = pd.concat([extended_df, new_row], ignore_index=True)
+
+        # Choose chart type for prediction
+        st.markdown("### 📊 Select Prediction Chart Type")
+        pred_chart_type = st.selectbox("Choose chart type for prediction:", ["Line", "Bar", "Scatter"])
+
+        # Plot prediction
+        if pred_chart_type == "Line":
+            fig_pred = px.line(extended_df, x='Year', y='Value',
+                               title=f"Line Chart with Forecast for {next_year}",
+                               markers=True, labels={'Year': 'Year', 'Value': 'Value'})
+        elif pred_chart_type == "Bar":
+            fig_pred = px.bar(extended_df, x='Year', y='Value',
+                              title=f"Bar Chart with Forecast for {next_year}",
+                              labels={'Year': 'Year', 'Value': 'Value'},
+                              color_discrete_sequence=['skyblue'])
+        elif pred_chart_type == "Scatter":
+            fig_pred = px.scatter(extended_df, x='Year', y='Value',
+                                  title=f"Scatter Chart with Forecast for {next_year}",
+                                  labels={'Year': 'Year', 'Value': 'Value'},
+                                  size_max=8)
+
+        # Highlight predicted point
+        fig_pred.add_scatter(x=[next_year], y=[prediction], mode='markers+text',
+                             marker=dict(color='red', size=10),
+                             text=["Predicted"], textposition="top center",
+                             name="Forecast")
+
+        st.plotly_chart(fig_pred, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"Prediction failed: {e}")
+
+# CSV Download
+st.markdown("---")
+csv_data = convert_df_to_csv(indicator_df[['Year', 'Indicator Name', 'Indicator Code', 'Value']])
+safe_name = "".join([c if c.isalnum() else "_" for c in selected_indicator])[:50]
+file_name = f"{safe_name}_data.csv"
+st.download_button("📥 Download Data as CSV", data=csv_data, file_name=file_name, mime='text/csv')
 
 # Sidebar footer
 st.sidebar.markdown("---")
