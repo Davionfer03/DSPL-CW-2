@@ -178,7 +178,7 @@ if 'predict_clicked' not in st.session_state:
     st.session_state.predict_clicked = False
 
 if not indicator_df.empty and indicator_df['Year'].nunique() > 1:
-    if st.button("📈 Prediction for the year 2024"):
+    if st.button("📈 Prediction of next year"):
         st.session_state.predict_clicked = True
 
 if st.session_state.predict_clicked and not indicator_df.empty and indicator_df['Year'].nunique() > 1:
